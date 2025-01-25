@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VWFR Simple Gallery</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 90%;
+            max-width: 1500px;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>VWFR Simple Gallery</h1>
+    <div class="gallery"></div>
+    <div class="error" style="display: none;">Invalid or missing URL parameter "link".</div>
+
+    <script>
+        $(document).ready(function () {
+            function getURLParameter(name) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            }
+
+            function decodeBase64(encoded) {
+                try {
+                    return atob(encoded);
+                } catch (e) {
+                    console.error("Error decoding Base64:", e);
+                    return null;
+                }
+            }
+
+            const encodedLink = getURLParameter("link");
+
+            if (!encodedLink) {
+                $(".error").show();
+                return;
+            }
+
+            const decodedLinks = decodeBase64(encodedLink);
+
+            if (!decodedLinks) {
+                $(".error").show();
+                return;
+            }
+
+            const imageIds = decodedLinks.split(/\r?\n|;/).filter(id => id.trim() !== "");
+
+            if (imageIds.length === 0) {
+                $(".error").show();
+                return;
+            }
+
+            const baseUrl = "https://i.ibb.co/";
+            const suffix = "/VWFR.png";
+            const gallery = $(".gallery");
+
+            imageIds.forEach(id => {
+                const fullLink = `${baseUrl}${id}${suffix}`;
+                const img = $("<img>").attr("src", fullLink).attr("alt", "Image");
+                gallery.append(img);
+            });
+        });
+    </script>
+</body>
+</html>
